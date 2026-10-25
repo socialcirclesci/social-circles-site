@@ -14,6 +14,7 @@ from event_card import GitHub, format_body
 # question title words -> card heading, checked in this order (first match wins)
 MATCH = [
     (r"e-?mail|phone|contact|your name", None),
+    (r"photo|screenshot|image|poster|flyer|picture", "_photo"),
     (r"end", "End date"),
     (r"link|url|website|ticket", "Link"),
     (r"organi[sz]|host|who('| i)s running", "Organiser"),
@@ -73,7 +74,7 @@ def main():
         for sub in data.get("submissions", []):
             if sub["id"] in seen:
                 continue
-            fields, title, about = {}, "", []
+            fields, title, about, photo = {}, "", [], False
             for r in sub.get("responses", []):
                 q = questions.get(r["questionId"], {})
                 heading = heading_for(q.get("title", ""))
@@ -82,13 +83,16 @@ def main():
                     continue
                 if heading == "_title":
                     title = v
+                elif heading == "_photo":  # stays in Tally with the contact details, the card just says it's there
+                    photo = True
                 elif heading == "_about":
                     about.append(v)
                 else:
                     fields.setdefault(heading, v)
             fields["Pick blurb"] = " ".join(about)[:400]
             fields["Type"] = "Event"
-            fields["Source"] = f"Website form, sent {sub.get('submittedAt', '')[:10]}. Their contact details are in Tally."
+            kept = "Their contact details and the photo they attached are" if photo else "Their contact details are"
+            fields["Source"] = f"Website form, sent {sub.get('submittedAt', '')[:10]}. {kept} in Tally: https://tally.so/forms/{form}/submissions"
             fields["Fit note"] = "Sent in by the organiser or a guest. Check the details and the link before approving."
             gh.call("POST", f"/repos/{gh.repo}/issues", {
                 "title": (title or "Event sent in through the website").strip()[:200],

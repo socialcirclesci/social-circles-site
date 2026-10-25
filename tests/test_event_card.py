@@ -69,7 +69,8 @@ class Tally(unittest.TestCase):
     def test_headings(self):
         cases = {"Event name": "_title", "Date of the event": "Date", "End date (if it runs over several days)": "End date",
                  "Start time": "Time", "Venue": "Venue", "Who's running it?": "Organiser", "Organiser name": "Organiser",
-                 "Ticket link": "Link", "Price": "Price", "Category": "Category", "Your email": None, "Tell us about it": "_about"}
+                 "Ticket link": "Link", "Price": "Price", "Category": "Category", "Your email": None, "Tell us about it": "_about",
+                 "Photo or screenshot of the event": "_photo", "Poster": "_photo"}
         for title, heading in cases.items():
             self.assertEqual(heading_for(title), heading, title)
 
