@@ -22,6 +22,7 @@ When asked to run the event search:
    - islandtickethut.com
    - Eventbrite: eventbrite.com/b/jersey/music/ and eventbrite.co.uk/d/jersey--jersey/events/ (open each event page to confirm the date; listing pages are often stale)
    - watersplashjersey.com/events/whats-on/ (often only food offers; check jersey.com for their nights)
+   - The Wellbeing Hub, 19 Commercial Buildings, St Helier: app.wellbeinghub.je/suite/organizations/134f8bc6-ea43-4905-929c-b67d1c75b9ec (an app page that may not load without a browser; if you can't read it, say so in the summary rather than guessing)
    Instagram and Facebook block automated reading, so skip them.
 3. For each new event, open one issue with labels `pending` and `found`. Fill every field you can confirm from the page; leave the rest as `_No response_`. Set "Source" to the page URL. Never add the `approved` label: Nikita approves everything herself.
 4. Write a one-line "Fit note" starting "Strong fit", "Maybe" or "Probably not", with the reason. Strong fits are small, independent, creative or social events where people can meet others: gigs, makers' markets, workshops, supper clubs, art, heritage walks, wellbeing, outdoor meet-ups. Probably not: corporate conferences, private functions, chain promotions, anything aimed only at under-18s.
