@@ -1,0 +1,107 @@
+"""Turn new "Add an event" submissions from Tally into pending event cards.
+
+Run every hour by the Tally workflow. Needs the TALLY_API_KEY secret and the
+TALLY_SUBMIT_FORM_ID variable; until both are set it does nothing. The submitter's email
+and phone stay in Tally: this repository is public, so they never go on a card.
+"""
+import json
+import os
+import re
+import urllib.request
+
+from event_card import GitHub, format_body
+
+# question title words -> card heading, checked in this order (first match wins)
+MATCH = [
+    (r"e-?mail|phone|contact|your name", None),
+    (r"end", "End date"),
+    (r"link|url|website|ticket", "Link"),
+    (r"organi[sz]|host|who('| i)s running", "Organiser"),
+    (r"event name|name of|title|what's it called", "_title"),
+    (r"date|when", "Date"),
+    (r"time|start", "Time"),
+    (r"venue|where|location|address", "Venue"),
+    (r"price|cost|free", "Price"),
+    (r"categor|type of", "Category"),
+    (r"descri|about|tell us|details", "_about"),
+]
+
+
+def heading_for(title):
+    t = title.lower()
+    for pattern, heading in MATCH:
+        if re.search(pattern, t):
+            return heading
+    return "_about"
+
+
+def text(answer, options):
+    if answer is None:
+        return ""
+    if isinstance(answer, list):
+        return ", ".join(text(a, options) for a in answer if a not in (None, ""))
+    if isinstance(answer, dict):
+        for k in ("text", "name", "title", "url", "value"):
+            if answer.get(k):
+                return str(answer[k])
+        return json.dumps(answer, ensure_ascii=False)
+    return options.get(str(answer), str(answer))
+
+
+def tally(path, key):
+    req = urllib.request.Request(f"https://api.tally.so{path}", headers={"Authorization": f"Bearer {key}"})
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())
+
+
+def main():
+    key, form = os.environ.get("TALLY_API_KEY"), os.environ.get("TALLY_SUBMIT_FORM_ID")
+    if not key or not form:
+        print("Tally isn't connected yet (TALLY_API_KEY secret or TALLY_SUBMIT_FORM_ID variable missing). Nothing to do.")
+        return
+    gh = GitHub()
+    gh.ensure_labels()
+    seen = set()
+    for issue in gh.issues(state="all", labels="submitted"):
+        seen.update(re.findall(r"<!-- tally:([\w-]+) -->", issue["body"] or ""))
+
+    page, made = 1, 0
+    while True:
+        data = tally(f"/forms/{form}/submissions?filter=completed&limit=100&page={page}", key)
+        questions = {q["id"]: q for q in data.get("questions", [])}
+        options = {f["uuid"]: f["title"] for q in questions.values() for f in q.get("fields", []) if f.get("uuid") and f.get("title")}
+        for sub in data.get("submissions", []):
+            if sub["id"] in seen:
+                continue
+            fields, title, about = {}, "", []
+            for r in sub.get("responses", []):
+                q = questions.get(r["questionId"], {})
+                heading = heading_for(q.get("title", ""))
+                v = r.get("formattedAnswer") or text(r.get("answer"), options)
+                if heading is None or not str(v).strip():
+                    continue
+                if heading == "_title":
+                    title = v
+                elif heading == "_about":
+                    about.append(v)
+                else:
+                    fields.setdefault(heading, v)
+            fields["Pick blurb"] = " ".join(about)[:400]
+            fields["Type"] = "Event"
+            fields["Source"] = f"Website form, sent {sub.get('submittedAt', '')[:10]}. Their contact details are in Tally."
+            fields["Fit note"] = "Sent in by the organiser or a guest. Check the details and the link before approving."
+            gh.call("POST", f"/repos/{gh.repo}/issues", {
+                "title": (title or "Event sent in through the website").strip()[:200],
+                "body": format_body(fields, f"<!-- tally:{sub['id']} -->"),
+                "labels": ["pending", "submitted"],
+            })
+            seen.add(sub["id"])
+            made += 1
+        if not data.get("hasMore"):
+            break
+        page += 1
+    print(f"{made} new submissions turned into cards")
+
+
+if __name__ == "__main__":
+    main()

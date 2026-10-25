@@ -1,0 +1,48 @@
+name: Publish site
+
+# Rebuilds the site whenever the code changes, an approved card changes, or a new day starts
+# (so finished events drop off), then deploys it to GitHub Pages.
+on:
+  push:
+    branches: [main]
+  issues:
+    types: [edited, labeled, unlabeled, closed, reopened, deleted]
+  schedule:
+    - cron: "5 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # for card events, only bother when the card is (or just stopped being) approved
+    if: github.event_name != 'issues' || github.event.label.name == 'approved' || contains(github.event.issue.labels.*.name, 'approved')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build events.json from approved cards
+        run: python3 scripts/build_events.py --out site/events.json --tidy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
