@@ -9,6 +9,7 @@ import datetime as dt
 import json
 
 from event_card import GitHub, to_event
+from seo import inject
 
 TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
 CHECK = "<!-- sc-check -->"
@@ -21,6 +22,7 @@ def trusted(issue):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="site/events.json")
+    ap.add_argument("--html", help="page to build the events' search-engine data into, e.g. site/index.html")
     ap.add_argument("--tidy", action="store_true", help="comment on cards that can't be read and close finished ones")
     args = ap.parse_args()
     gh, today = GitHub(), dt.date.today()
@@ -58,6 +60,11 @@ def main():
     events.sort(key=lambda e: (e["d"], e["t"].lower()))
     with open(args.out, "w") as f:
         json.dump({"generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "events": events}, f, ensure_ascii=False, indent=1)
+    if args.html:
+        with open(args.html) as f:
+            page = f.read()
+        with open(args.html, "w") as f:
+            f.write(inject(page, events))
     print(f"{len(events)} events published")
 
 

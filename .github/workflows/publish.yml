@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build events.json from approved cards
-        run: python3 scripts/build_events.py --out site/events.json --tidy
+        run: python3 scripts/build_events.py --out site/events.json --html site/index.html --tidy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/configure-pages@v5

@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from event_card import format_body, parse_date, to_event  # noqa: E402
 from tally_to_cards import heading_for, text  # noqa: E402
+from seo import event_ld, inject, start_time  # noqa: E402
 
 TODAY = dt.date(2026, 10, 25)
 
@@ -77,6 +78,29 @@ class Tally(unittest.TestCase):
     def test_option_ids_become_titles(self):
         self.assertEqual(text(["u1", "u2"], {"u1": "Music", "u2": "Art"}), "Music, Art")
         self.assertEqual(text("2026-11-12", {}), "2026-11-12")
+
+
+class Seo(unittest.TestCase):
+    def test_start_times(self):
+        day = dt.date(2026, 11, 6)
+        self.assertEqual(start_time(day, "7:30pm").isoformat(), "2026-11-06T19:30:00+00:00")
+        self.assertEqual(start_time(day, "6–7:15pm").hour, 18)
+        self.assertEqual(start_time(dt.date(2026, 10, 24), "10am").isoformat(), "2026-10-24T10:00:00+01:00")
+        for vague in ("", "Evening", "Sat & Sun, 10am–4pm"):
+            self.assertIsNone(start_time(day, vague), vague)
+
+    def test_event_credits_the_organiser(self):
+        e = event_ld({"d": "2026-11-06", "t": "Pub & Cards", "by": "Her Code JSY", "at": "Post Horn", "time": "7:30pm",
+                      "price": "Free", "cat": "Food & drink", "url": "https://www.instagram.com/hercodejsy/", "free": True})
+        self.assertEqual(e["organizer"]["name"], "Her Code JSY")
+        self.assertEqual(e["offers"]["price"], "0")
+        self.assertEqual(e["location"]["address"]["addressCountry"], "JE")
+
+    def test_inject_replaces_the_old_data(self):
+        page = '<head><script type="application/ld+json" id="ld-events">{}</script></head>'
+        once = inject(page, [])
+        self.assertEqual(inject(once, []), once)
+        self.assertEqual(once.count("ld-events"), 1)
 
 
 if __name__ == "__main__":
