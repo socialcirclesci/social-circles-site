@@ -398,7 +398,7 @@ form.card .btn-dark{background:var(--tomato);color:var(--aubergine)}
       <p class="intro">Find the gigs, markets, workshops and supper clubs you'd usually only hear about afterwards, and go along with people you haven't met yet.</p>
       <form class="search" role="search" onsubmit="event.preventDefault();document.getElementById('whats-on').scrollIntoView({behavior:'smooth'})">
         <label for="q" class="sr" style="position:absolute;left:-9999px">Search events</label>
-        <input id="q" type="search" placeholder="Try “candle”, “live music” or “St Aubin”">
+        <input id="q" type="search" placeholder="Try “candle”, “music” or “Greve de Lecq”">
         <button class="btn btn-violet" type="submit">Find events</button>
       </form>
       <div class="meta-row"><span class="live" id="updated">Updated this week</span><span id="heroCount">Listings from 8 sources and local organisers</span></div>
@@ -696,13 +696,16 @@ function range(){
   return [TODAY, plus(TODAY, 3650)];
 }
 
+// words people type that don't narrow anything down ("live music in St Helier" finds the music in St Helier)
+const FILLER = new Set(["a","an","the","and","in","at","on","of","for","with","near","live","event","events","jersey","whats","what's","this","week"]);
 function visible(){
-  const q = state.q.trim().toLowerCase(), [from, to] = range();
+  const words = state.q.toLowerCase().split(/[^\p{L}\p{N}&']+/u).filter(w => w && !FILLER.has(w)), [from, to] = range();
   return E.filter(e => {
     if (!overlaps(e, from, to)) return false;
     if (state.free && !e.free) return false;
     if (state.cats.size && !state.cats.has(e.cat)) return false;
-    if (q && !(e.t+" "+e.by+" "+e.at+" "+e.cat).toLowerCase().includes(q)) return false;
+    const text = [e.t, e.by, e.at, e.cat, e.blurb, e.price, e.time, e.free ? "free" : ""].join(" ").toLowerCase();
+    if (!words.every(w => text.includes(w))) return false;
     return true;
   });
 }
@@ -710,7 +713,7 @@ function visible(){
 function render(){
   const box = document.getElementById("agenda");
   const label = {all:"All upcoming", weekend:"This weekend", next7:"Next 7 days"}[state.when];
-  document.getElementById("listLabel").textContent = label + " · " + (state.island === "jersey" ? "Jersey" : "Guernsey");
+  document.getElementById("listLabel").textContent = label + " · " + (state.island === "jersey" ? "Jersey" : "Guernsey") + (state.q.trim() ? ` · “${state.q.trim()}”` : "");
   if (state.island === "guernsey") {
     document.getElementById("count").textContent = "";
     box.innerHTML = `<div class="empty"><span class="eyebrow">Coming soon</span><h3>Guernsey<br><span class="v">is next</span></h3><p>We're starting with Jersey and adding Guernsey once we've found the best local sources. Know what's on over there? Send it our way and we'll list it.</p><a class="btn btn-violet" href="https://www.instagram.com/socialcircles_ci/" data-form="submit" style="align-self:flex-start">Tell us about an event</a></div>`;
@@ -718,7 +721,7 @@ function render(){
   }
   const list = visible(), [from] = range();
   document.getElementById("count").textContent = list.length + (list.length === 1 ? " event" : " events");
-  if (!list.length) { box.innerHTML = `<div class="empty"><span class="eyebrow">Nothing matches</span><h3>Try a<br><span class="v">wider search</span></h3><p>No events match those filters yet. Clear a filter or pick a later date.</p></div>`; return; }
+  if (!list.length) { box.innerHTML = `<div class="empty"><span class="eyebrow">Nothing matches</span><h3>Try a<br><span class="v">wider search</span></h3><p>No events match ${state.q.trim() ? `“${esc(state.q.trim())}” with ` : ""}those filters yet. Try another word, clear a filter or pick a later date.</p>${state.q.trim() ? `<button class="btn btn-line" type="button" onclick="document.getElementById('q').value='';state.q='';render()" style="align-self:flex-start">Clear search</button>` : ""}</div>`; return; }
   // an event that's already running sits under the first day of the range
   const groups = {};
   list.forEach(e => { const k = key(startOf(e) < from ? from : startOf(e)); (groups[k] = groups[k] || []).push(e); });
