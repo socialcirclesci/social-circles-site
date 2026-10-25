@@ -19,4 +19,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
-          TALLY_SUBMIT_FORM_ID: ${{ vars.TALLY_SUBMIT_FORM_ID }}
+          TALLY_SUBMIT_FORM_ID: ${{ vars.TALLY_SUBMIT_FORM_ID || 'LDZAZz' }}  # the "Add an event" form

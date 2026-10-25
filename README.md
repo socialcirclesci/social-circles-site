@@ -25,7 +25,7 @@ The site updates a minute or two after you approve. Finished events come off by 
 ## Settings
 
 - **Tally forms** go in `FORMS` at the top of the script in `site/index.html` (the part of the link after `tally.so/r/`).
-- **Tally import** needs the `TALLY_API_KEY` secret and the `TALLY_SUBMIT_FORM_ID` variable (Settings → Secrets and variables → Actions).
+- **Tally import** needs the `TALLY_API_KEY` secret (Settings → Secrets and variables → Actions). The "Add an event" form id is set in `.github/workflows/tally.yml`; a `TALLY_SUBMIT_FORM_ID` variable overrides it.
 - **Your domain** goes in Settings → Pages → Custom domain.
 
 ## For developers
