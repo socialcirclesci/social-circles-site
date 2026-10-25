@@ -7,6 +7,7 @@ and phone stay in Tally: this repository is public, so they never go on a card.
 import json
 import os
 import re
+import urllib.error
 import urllib.request
 
 from event_card import GitHub, format_body
@@ -50,9 +51,16 @@ def text(answer, options):
 
 
 def tally(path, key):
-    req = urllib.request.Request(f"https://api.tally.so{path}", headers={"Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req) as r:
-        return json.loads(r.read())
+    # Tally's API sits behind a bot check that refuses Python's default User-Agent with a 403
+    req = urllib.request.Request(f"https://api.tally.so{path}", headers={
+        "Authorization": f"Bearer {key}", "Accept": "application/json", "User-Agent": "social-circles-site (GitHub Actions)"})
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as err:
+        detail = err.read().decode(errors="replace")[:300]
+        hint = " Check the TALLY_API_KEY secret is a current key from the same Tally account as the form." if err.code in (401, 403) else ""
+        raise SystemExit(f"Tally said {err.code} {err.reason} for {path.split('?')[0]}: {detail}{hint}") from None
 
 
 def main():
