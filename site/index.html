@@ -285,8 +285,7 @@ form.card .btn-dark{background:var(--tomato);color:var(--aubergine)}
 .secret::before{content:"";position:absolute;z-index:-1;left:-25vw;bottom:-70vw;width:90vw;aspect-ratio:1;border-radius:50%;background:var(--aubergine)}
 .secret h2 .v{color:var(--lilac)}
 .secret .head .eyebrow{color:var(--accent-soft)}
-.lockers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-@media (max-width:860px){.lockers{grid-template-columns:1fr}}
+.lockers{display:grid;grid-template-columns:minmax(0,420px);gap:16px}
 .lk{position:relative;border-radius:22px;overflow:hidden;background:var(--cream);color:var(--aubergine);min-height:240px}
 .lk .inside{padding:24px;display:flex;flex-direction:column;gap:10px;filter:blur(9px);transition:filter .6s ease;user-select:none}
 .lk h3{font-size:34px}
@@ -416,6 +415,8 @@ form.card .btn-dark{background:var(--tomato);color:var(--aubergine)}
     <button class="chip" id="c-well" aria-pressed="false" data-cat="Wellbeing">Wellbeing</button>
     <button class="chip" id="c-heritage" aria-pressed="false" data-cat="Heritage">Heritage</button>
     <button class="chip" id="c-family" aria-pressed="false" data-cat="Family">Family</button>
+    <button class="chip" id="c-halloween" aria-pressed="false" data-cat="Halloween" hidden>Halloween</button>
+    <button class="chip" id="c-christmas" aria-pressed="false" data-cat="Christmas" hidden>Christmas</button>
   </div>
 </div>
 
@@ -482,7 +483,7 @@ form.card .btn-dark{background:var(--tomato);color:var(--aubergine)}
       <div><span class="eyebrow">Members only</span><h2 style="font-size:clamp(38px,5vw,64px)">Off the<br><span class="v">usual map</span></h2></div>
       <p class="intro" style="max-width:38ch">Small Social Circles nights we'll only share with the people on our list. The first ones are in the works, so join now to be first to know.</p>
     </div>
-    <div class="lockers"><article class="lk"><div class="inside" aria-hidden="true"><span class="eyebrow">Coming soon</span><h3>Watch this<br>space</h3><p style="font-size:15px">You're on the list. We'll email you as soon as the first one's announced.</p></div><div class="veil"><div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3" fill="#FFF6EA"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#FFF6EA" stroke-width="2.4"/></svg></div><span class="tease">Small · secret · local</span></div></article><article class="lk"><div class="inside" aria-hidden="true"><span class="eyebrow">In the works</span><h3>Something<br>off-grid</h3><p style="font-size:15px">Members hear about it first, before it goes anywhere else.</p></div><div class="veil"><div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3" fill="#FFF6EA"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#FFF6EA" stroke-width="2.4"/></svg></div><span class="tease">Members hear first</span></div></article><article class="lk"><div class="inside" aria-hidden="true"><span class="eyebrow">Not long now</span><h3>First<br>dibs</h3><p style="font-size:15px">Spaces will be few, so keep an eye on your inbox.</p></div><div class="veil"><div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3" fill="#FFF6EA"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#FFF6EA" stroke-width="2.4"/></svg></div><span class="tease">Dates drop soon</span></div></article></div>
+    <div class="lockers"><article class="lk"><div class="inside" aria-hidden="true"><span class="eyebrow">Coming soon</span><h3>Watch this<br>space</h3><p style="font-size:15px">You're on the list. We'll email you as soon as the first one's announced.</p></div><div class="veil"><div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3" fill="#FFF6EA"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#FFF6EA" stroke-width="2.4"/></svg></div><span class="tease">Small · secret · local</span></div></article></div>
     <form class="unlock" id="unlockForm">
       <label for="u-email" style="position:absolute;left:-9999px">Email</label>
       <input id="u-email" type="email" placeholder="Your email" autocomplete="email">
@@ -655,6 +656,17 @@ function range(){
   return [TODAY, plus(TODAY, 3650)];
 }
 
+// Halloween and Christmas work like categories. A card can set its Season; otherwise an event whose
+// name or blurb is clearly seasonal, and that falls in that season, counts too.
+const SEASON = {
+  halloween: { name: "Halloween", words: "halloween spooky", months: [9, 10], match: /hallowe'?en|samhain|spook|haunt|ghost|pumpkin|trick or treat|fright|witch|zombie|day of the dead/i },
+  christmas: { name: "Christmas", words: "christmas xmas festive", months: [10, 11], match: /christmas|xmas|festive|santa|carol|nativity|advent|yule|mince pie|reindeer|panto|winter wonderland|wreath/i },
+};
+function guessSeason(e){
+  if (SEASON[e.season]) return e.season;
+  const text = [e.t, e.blurb].join(" "), m = day(e.d).getMonth();
+  return Object.keys(SEASON).find(k => SEASON[k].months.includes(m) && SEASON[k].match.test(text)) || "";
+}
 // words people type that don't narrow anything down ("live music in St Helier" finds the music in St Helier)
 const FILLER = new Set(["a","an","the","and","in","at","on","of","for","with","near","live","event","events","jersey","whats","what's","this","week"]);
 function visible(){
@@ -662,8 +674,8 @@ function visible(){
   return E.filter(e => {
     if (!overlaps(e, from, to)) return false;
     if (state.free && !e.free) return false;
-    if (state.cats.size && !state.cats.has(e.cat)) return false;
-    const text = [e.t, e.by, e.at, e.cat, e.blurb, e.price, e.time, e.free ? "free" : ""].join(" ").toLowerCase();
+    if (state.cats.size && !state.cats.has(e.cat) && !state.cats.has(SEASON[e.season]?.name)) return false;
+    const text = [e.t, e.by, e.at, e.cat, e.blurb, e.price, e.time, e.free ? "free" : "", SEASON[e.season]?.words].join(" ").toLowerCase();
     if (!words.every(w => text.includes(w))) return false;
     return true;
   });
@@ -690,7 +702,7 @@ function render(){
       <article class="row${e.out ? " soldout" : ""}"${e.season ? ` data-season="${e.season}"` : ""}>
         <div style="min-width:0"><span class="by">By ${esc(e.by)}</span><h4>${esc(e.t)}</h4>
           <div class="facts">${e.time ? `<span><b>${esc(e.time)}</b></span>` : ""}${e.end && e.end !== e.d ? `<span>Until ${short(endOf(e))}</span>` : ""}<span>${esc(e.at)}</span>${e.price ? `<span>${esc(e.price)}</span>` : ""}</div>
-          <div class="tags"><span class="tag cat">${esc(e.cat)}</span>${e.free ? `<span class="tag free">Free</span>` : ""}${e.season ? `<span class="tag season">${e.season === "halloween" ? "Halloween" : "Christmas"}</span>` : ""}${e.out ? `<span class="tag out">Sold out</span>` : ""}</div></div>
+          <div class="tags"><span class="tag cat">${esc(e.cat)}</span>${e.free ? `<span class="tag free">Free</span>` : ""}${e.season ? `<span class="tag season">${SEASON[e.season].name}</span>` : ""}${e.out ? `<span class="tag out">Sold out</span>` : ""}</div></div>
         <div class="ctas">${e.out ? "" : `<a class="btn btn-line" href="#meetup" data-go="${esc(e.t)}">Go together</a>`}${e.url ? `<a class="btn ${e.out ? "btn-line" : "btn-dark"}" href="${esc(e.url)}">${e.out ? "Listing" : esc(e.link || "Tickets & info")}</a>` : ""}</div>
       </article>`).join("")}</div></div>`;
   }).join("");
@@ -772,7 +784,8 @@ document.getElementById("meetForm").addEventListener("submit", ev => {
 document.querySelectorAll("[data-until]").forEach(el => { if (day(el.dataset.until) < TODAY) el.remove(); });
 function fill(){ render(); renderPicks(); renderExh(); fillMeet(); }
 fetch("events.json", { cache: "no-cache" }).then(r => r.json()).then(d => {
-  E = d.events.filter(e => e.type !== "exhibition");
+  E = d.events.filter(e => e.type !== "exhibition").map(e => ({ ...e, season: guessSeason(e) }));
+  for (const k in SEASON) document.getElementById("c-" + k).hidden = !E.some(e => e.season === k && endOf(e) >= TODAY);
   X = d.events.filter(e => e.type === "exhibition");
   if (d.generated) document.getElementById("updated").textContent = "Updated " + short(new Date(d.generated));
 }).catch(() => {}).finally(fill);
