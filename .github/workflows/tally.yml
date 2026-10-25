@@ -1,0 +1,22 @@
+name: Import Tally submissions
+
+# Every hour, new "Add an event" submissions become pending event cards.
+on:
+  schedule:
+    - cron: "20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/tally_to_cards.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+          TALLY_SUBMIT_FORM_ID: ${{ vars.TALLY_SUBMIT_FORM_ID }}

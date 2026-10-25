@@ -1,0 +1,44 @@
+name: Event
+description: Add an event by hand. It waits as pending until you add the "approved" label.
+labels: ["pending"]
+body:
+  - type: input
+    attributes: {label: Date, description: "The (first) day, like 2026-11-12 or 12 Nov 2026"}
+    validations: {required: true}
+  - type: input
+    attributes: {label: End date, description: "Only for things that run over several days, like exhibitions or markets"}
+  - type: input
+    attributes: {label: Time, placeholder: "7:30pm"}
+  - type: input
+    attributes: {label: Venue}
+    validations: {required: true}
+  - type: input
+    attributes: {label: Organiser}
+    validations: {required: true}
+  - type: input
+    attributes: {label: Price, placeholder: "£15, Free, or Pay what you can"}
+  - type: dropdown
+    attributes:
+      label: Category
+      options: [Music, Art, Workshops, Markets, Food & drink, Outdoors, Wellbeing, Heritage, Family]
+    validations: {required: true}
+  - type: dropdown
+    attributes: {label: Free, options: ["No", "Yes"]}
+  - type: input
+    attributes: {label: Link, description: "Tickets or the organiser's page"}
+  - type: input
+    attributes: {label: Button text, placeholder: "Tickets & info"}
+  - type: dropdown
+    attributes: {label: Type, options: [Event, Exhibition]}
+  - type: dropdown
+    attributes: {label: Weekend pick, description: "Yes puts it in 'This weekend we'd go to'", options: ["No", "Yes"]}
+  - type: textarea
+    attributes: {label: Pick blurb, description: "One or two sentences for the weekend pick card"}
+  - type: dropdown
+    attributes: {label: Season, options: [None, Halloween, Christmas]}
+  - type: dropdown
+    attributes: {label: Sold out, options: ["No", "Yes"]}
+  - type: input
+    attributes: {label: Source, description: "Where you found it"}
+  - type: textarea
+    attributes: {label: Fit note}
