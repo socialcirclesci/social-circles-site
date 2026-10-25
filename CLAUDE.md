@@ -24,6 +24,8 @@ When asked to run the event search:
    - watersplashjersey.com/events/whats-on/ (often only food offers; check jersey.com for their nights)
    - The Wellbeing Hub, 19 Commercial Buildings, St Helier: app.wellbeinghub.je/suite/organizations/134f8bc6-ea43-4905-929c-b67d1c75b9ec (an app page that may not load without a browser; if you can't read it, say so in the summary rather than guessing)
    - Her Code JSY: hercodejsy.my.canva.site (a Canva site that may not load without a browser; she posts most events on Instagram @hercodejsy, so Nikita sends those as screenshots)
+   - ArtHouse Jersey: arthousejersey.je/whats-on (open each event page for times and prices; venues include Capital House, 8 Church Street, St Helier and ArtHouse HQ at Greve de Lecq Barracks)
+   - The Stoodio (open arts studio and shop run by two local artists, supported by ArtHouse Jersey): eventbrite.com/o/the-stoodio-jersey-107682903541 (the listing often shows no events, so also check ArtHouse's what's on and search Eventbrite for "Stoodio")
    Instagram and Facebook block automated reading, so skip them.
 3. For each new event, open one issue with labels `pending` and `found`. Fill every field you can confirm from the page; leave the rest as `_No response_`. Set "Source" to the page URL. Never add the `approved` label: Nikita approves everything herself.
 4. Write a one-line "Fit note" starting "Strong fit", "Maybe" or "Probably not", with the reason. Strong fits are small, independent, creative or social events where people can meet others: gigs, makers' markets, workshops, supper clubs, art, heritage walks, wellbeing, outdoor meet-ups. Probably not: corporate conferences, private functions, chain promotions, anything aimed only at under-18s.
