@@ -19,6 +19,8 @@ To review a card (the GitHub phone app works well for this):
 | Take it off the site | Remove the `approved` label, or close the card |
 | Reject it | Close the card |
 | Make it a weekend pick | Set "Weekend pick" to Yes and write a short "Pick blurb" |
+| Something on more than once | Set "Repeats" to Daily, Every Friday, or the other dates (like 30 Oct, 6 Nov). It stops at the "End date" if there is one |
+| Something on for several days | Set the "End date". Exhibitions and anything running over a week show under "Running now" at the top of the list |
 
 The site updates a minute or two after you approve. Finished events come off by themselves the next morning and their cards close.
 

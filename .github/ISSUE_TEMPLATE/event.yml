@@ -8,6 +8,8 @@ body:
   - type: input
     attributes: {label: End date, description: "Only for things that run over several days, like exhibitions or markets"}
   - type: input
+    attributes: {label: Repeats, description: "Only for things on more than once: Daily, Every Friday, or the other dates like 30 Oct, 6 Nov. Runs until the End date if there is one", placeholder: "Every Friday"}
+  - type: input
     attributes: {label: Time, placeholder: "7:30pm"}
   - type: input
     attributes: {label: Venue}

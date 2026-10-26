@@ -15,6 +15,7 @@ import urllib.request
 FIELDS = [
     ("Date", "d"),
     ("End date", "end"),
+    ("Repeats", "repeat"),
     ("Time", "time"),
     ("Venue", "at"),
     ("Organiser", "by"),
@@ -102,6 +103,33 @@ def _date(y, m, d):
         return None
 
 
+DAYS = [d.lower() for d in calendar.day_name]
+AHEAD = 84  # how far ahead a repeating event is listed (the site rebuilds every morning)
+
+
+def repeats(raw, start, end, today):
+    """Expand the Repeats field into ("daily" | "weekly" | "dates", [dates from today on]), or None.
+
+    "Daily", "Weekly", "Every Friday" or "Every Tue and Thu" repeat until the End date (or 12 weeks
+    ahead); anything with numbers in it is read as a list of extra dates, like "30 Oct, 6 Nov".
+    """
+    v = value(raw).lower()
+    if not v or not start:
+        return None
+    first, last = max(start, today), min(end or today + dt.timedelta(days=AHEAD), today + dt.timedelta(days=AHEAD))
+    span = [first + dt.timedelta(days=i) for i in range((last - first).days + 1)]
+    if re.search(r"\b(daily|every ?day)\b", v):
+        return "daily", span
+    if re.search(r"\d", v):  # dates, which may name their weekday ("Fri 30 Oct")
+        dates = {start} | {d for d in (parse_date(part, today) for part in re.split(r"[,;&+\n]|\band\b", v)) if d}
+        return "dates", sorted(d for d in dates if d >= today)
+    days = {i for i, name in enumerate(DAYS) if re.search(rf"\b{name[:3]}(?!th)", v)}
+    if days or re.search(r"\b(weekly|every week)\b", v):
+        days = days or {start.weekday()}
+        return "weekly", [d for d in span if d.weekday() in days]
+    return None
+
+
 def category(raw):
     v = value(raw)
     for c in CATEGORIES:
@@ -140,7 +168,11 @@ def to_event(title, body, today=None):
     }
     if end and end != d:
         e["end"] = end.isoformat()
-    if yes(f.get("Free")):
+    rep = repeats(f.get("Repeats"), d, end, today or dt.date.today())
+    if rep and rep[1]:
+        e["repeat"], e["dates"] = rep[0], [x.isoformat() for x in rep[1]]
+        e.pop("end", None)  # the dates say when it's on
+    if yes(f.get("Free")) or re.match(r"free\b", e["price"], re.I):
         e["free"] = True
     if value(f.get("Button text")):
         e["link"] = value(f.get("Button text"))
