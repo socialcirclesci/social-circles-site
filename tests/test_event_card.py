@@ -59,6 +59,29 @@ class Cards(unittest.TestCase):
         self.assertIsNone(e)
         self.assertIn("End date", problems[0])
 
+    def test_weekly(self):
+        e, _ = to_event("Movement", self.card(Date="2026-10-23", Repeats="Every Friday", **{"End date": "2026-11-20"}), TODAY)
+        self.assertEqual((e["repeat"], e["dates"]), ("weekly", ["2026-10-30", "2026-11-06", "2026-11-13", "2026-11-20"]))
+        self.assertNotIn("end", e)
+
+    def test_weekly_without_end_runs_twelve_weeks(self):
+        e, _ = to_event("Movement", self.card(Date="2026-10-30", Repeats="weekly"), TODAY)
+        self.assertEqual((e["dates"][0], len(e["dates"])), ("2026-10-30", 12))
+
+    def test_two_days_a_week_and_daily(self):
+        e, _ = to_event("Market", self.card(Date="2026-11-14", Repeats="Sat & Sun", **{"End date": "2026-11-22"}), TODAY)
+        self.assertEqual(e["dates"], ["2026-11-14", "2026-11-15", "2026-11-21", "2026-11-22"])
+        e, _ = to_event("Fair", self.card(Date="2026-11-19", Repeats="Daily", **{"End date": "21 Nov 2026"}), TODAY)
+        self.assertEqual((e["repeat"], e["dates"]), ("daily", ["2026-11-19", "2026-11-20", "2026-11-21"]))
+
+    def test_extra_dates(self):
+        e, _ = to_event("Workshop", self.card(Date="2026-10-26", Repeats="also Fri 30 Oct, 6 Nov"), TODAY)
+        self.assertEqual((e["repeat"], e["dates"]), ("dates", ["2026-10-26", "2026-10-30", "2026-11-06"]))
+        self.assertNotIn("monthly", str(to_event("Club", self.card(Repeats="monthly, 3 Dec"), TODAY)[0]["dates"]))
+
+    def test_free_price_counts_as_free(self):
+        self.assertTrue(to_event("Gig", self.card(Price="Free, just turn up"), TODAY)[0]["free"])
+
     def test_issue_form_body(self):
         body = "### Date\n\n12 Nov 2026\n\n### End date\n\n_No response_\n\n### Venue\n\nThe Drift\n\n### Organiser\n\nIsland Music\n\n### Category\n\nMusic\n"
         e, problems = to_event("Bruce Foxton", body, TODAY)

@@ -40,7 +40,7 @@ def main():
             if args.tidy:
                 note(gh, issue, problems)
             continue
-        last = dt.date.fromisoformat(e.get("end", e["d"]))
+        last = dt.date.fromisoformat(max([e.get("end", e["d"])] + e.get("dates", [])))
         if last < today - dt.timedelta(days=1):
             if args.tidy:
                 gh.call("POST", f"/repos/{gh.repo}/issues/{issue['number']}/comments", {"body": "This event has finished, so I've taken it off the site and closed the card."})
@@ -54,7 +54,7 @@ def main():
             if any(l["name"] == "approved" for l in issue["labels"]):
                 continue
             e, _ = to_event(issue["title"], issue["body"], today)
-            if e and dt.date.fromisoformat(e.get("end", e["d"])) < today - dt.timedelta(days=1):
+            if e and dt.date.fromisoformat(max([e.get("end", e["d"])] + e.get("dates", []))) < today - dt.timedelta(days=1):
                 gh.call("PATCH", f"/repos/{gh.repo}/issues/{issue['number']}", {"state": "closed", "state_reason": "not_planned"})
 
     events.sort(key=lambda e: (e["d"], e["t"].lower()))
