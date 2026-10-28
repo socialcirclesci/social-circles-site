@@ -9,6 +9,7 @@ import datetime as dt
 import json
 
 from event_card import GitHub, to_event
+from pages import build, slug
 from seo import inject
 
 TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
@@ -23,6 +24,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="site/events.json")
     ap.add_argument("--html", help="page to build the events' search-engine data into, e.g. site/index.html")
+    ap.add_argument("--pages", help="site folder to build a page per event, the weekend page and the sitemap into, e.g. site")
     ap.add_argument("--tidy", action="store_true", help="comment on cards that can't be read and close finished ones")
     args = ap.parse_args()
     gh, today = GitHub(), dt.date.today()
@@ -58,6 +60,9 @@ def main():
                 gh.call("PATCH", f"/repos/{gh.repo}/issues/{issue['number']}", {"state": "closed", "state_reason": "not_planned"})
 
     events.sort(key=lambda e: (e["d"], e["t"].lower()))
+    if args.pages:
+        for e in events:
+            e["page"] = f"events/{slug(e)}/"
     with open(args.out, "w") as f:
         json.dump({"generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "events": events}, f, ensure_ascii=False, indent=1)
     if args.html:
@@ -65,6 +70,8 @@ def main():
             page = f.read()
         with open(args.html, "w") as f:
             f.write(inject(page, events))
+    if args.pages:
+        build(args.pages, events, today)
     print(f"{len(events)} events published")
 
 
