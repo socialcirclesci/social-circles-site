@@ -1,0 +1,29 @@
+name: Pre-check event cards
+
+# Labels each pending card "ready" or "check" with a comment saying why, so only the "check"
+# ones need a close look. Runs when a card is opened or edited, and every hour for cards the
+# Tally import added (cards made by workflows don't start other workflows).
+on:
+  issues:
+    types: [opened, edited, labeled]
+  schedule:
+    - cron: "50 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: review-cards
+  cancel-in-progress: false
+
+jobs:
+  review:
+    if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'pending')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/review_cards.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
