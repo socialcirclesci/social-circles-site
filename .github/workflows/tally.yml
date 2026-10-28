@@ -1,6 +1,7 @@
 name: Import Tally submissions
 
-# Every hour, new "Add an event" submissions become pending event cards.
+# Every hour, new "Add an event" submissions become pending event cards, and "Fix a listing"
+# reports go on the event's card with the "check" label.
 on:
   schedule:
     - cron: "20 * * * *"
@@ -20,3 +21,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
           TALLY_SUBMIT_FORM_ID: ${{ vars.TALLY_SUBMIT_FORM_ID || 'LDZAZz' }}  # the "Add an event" form
+      - run: python3 scripts/tally_fixes.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+          TALLY_FIX_FORM_ID: ${{ vars.TALLY_FIX_FORM_ID || '' }}  # the "Fix a listing" form

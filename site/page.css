@@ -39,6 +39,7 @@ dt{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;co
 dd{margin:0;font-weight:500}
 .actions,.cta,.more p{display:flex;flex-wrap:wrap;gap:8px}
 .note{font-size:14px;color:var(--muted)}
+.note a{color:var(--violet);font-weight:700}
 
 .hero{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
 .more{margin-top:56px;display:flex;flex-direction:column;gap:20px}

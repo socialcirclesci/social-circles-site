@@ -12,6 +12,8 @@ Every event is a card in this repository's [Issues](../../issues) tab.
 
 Every pending card is pre-checked within the hour and labelled **`ready`** (nothing looks wrong) or **`check`** (a comment on the card says what to look at: a missing time, price or link, a link that doesn't open, a date that's passed or isn't on the event page, a duplicate, contact details, or a "Probably not" fit). Filter by `check` to see only the ones that need you.
 
+Each event page has a **Something wrong with this listing?** link to the "Fix a listing" Tally form. Within the hour the report goes on that event's card as a comment and the card gets the `check` label. Fix the card, then take the label off.
+
 To review a card (the GitHub phone app works well for this):
 
 | To | Do this |
@@ -30,6 +32,7 @@ The site updates a minute or two after you approve. Finished events come off by 
 
 - **Tally forms** go in `FORMS` at the top of the script in `site/index.html` (the part of the link after `tally.so/r/`).
 - **Tally import** needs the `TALLY_API_KEY` secret (Settings → Secrets and variables → Actions). The "Add an event" form id is set in `.github/workflows/tally.yml`; a `TALLY_SUBMIT_FORM_ID` variable overrides it.
+- **Fix a listing form**: its id goes in `FIX_FORM` in `scripts/pages.py` (for the link) and in `.github/workflows/tally.yml` (for the import). Until it's set, the link doesn't show.
 - **Your domain** goes in Settings → Pages → Custom domain.
 
 ## For developers

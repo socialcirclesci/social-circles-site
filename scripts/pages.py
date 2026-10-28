@@ -10,10 +10,13 @@ import json
 import re
 import shutil
 import unicodedata
+import urllib.parse
 from pathlib import Path
 
 from seo import SITE, event_ld
 
+# the "Fix a listing" Tally form (the part after tally.so/r/); while it's empty the link isn't shown
+FIX_FORM = ""
 DOW, MON = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 DAY = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -114,6 +117,13 @@ def card(e, today):
 """
 
 
+def fix_link(e):
+    if not FIX_FORM:
+        return ""
+    query = urllib.parse.urlencode({"event": e["t"], "page": f"events/{slug(e)}/"})
+    return f' <a href="https://tally.so/r/{FIX_FORM}?{esc(query)}">Something wrong with this listing?</a>'
+
+
 def event_page(e, events, today):
     first = next_on(e, today) or dt.date.fromisoformat(e["d"])
     title = f"{e['t']}, {short(first)} · What's on in Jersey · Social Circles"
@@ -132,7 +142,7 @@ def event_page(e, events, today):
   {f'<p class="intro">{esc(e["blurb"])}</p>' if e.get("blurb") else ""}
   <dl>{''.join(f'<dt>{k}</dt><dd>{esc(v)}</dd>' for k, v in facts)}</dl>
   <div class="actions">{f'<a class="btn btn-dark" href="{esc(e["url"])}">{esc(e.get("link") or "Tickets & info")}</a>' if e.get("url") else ""}{'' if e.get("out") else '<a class="btn btn-line" href="/#meetup">Find people to go with</a>'}</div>
-  <p class="note">{esc(e['by'])} runs this event. Social Circles lists it so more people hear about it; tickets and details come from the organiser.</p>
+  <p class="note">{esc(e['by'])} runs this event. Social Circles lists it so more people hear about it; tickets and details come from the organiser.{fix_link(e)}</p>
 </article>
 """
     more = [x for x in events if x is not e and next_on(x, today)]
