@@ -38,6 +38,8 @@ LABELS = {
     "approved": ("2DA44E", "Live on the site"),
     "found": ("7B4DFF", "Found by the twice-weekly search"),
     "submitted": ("FF5B2E", "Sent in through the website form"),
+    "ready": ("B6E3C5", "Pre-checked: nothing looks wrong"),
+    "check": ("FFD3C4", "Pre-checked: something needs a look (see the comment)"),
 }
 EMPTY = {"", "_no response_", "none", "n/a", "-", "tbc"}
 
