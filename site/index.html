@@ -153,6 +153,7 @@ p{margin:0}
 .rows{display:flex;flex-direction:column;gap:12px;min-width:0}
 .row{background:var(--white);border-radius:18px;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;align-items:center}
 .row .by{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.row h4 a.name{text-decoration:none}.row h4 a.name:hover{text-decoration:underline;text-decoration-thickness:2px}
 .row h4{margin:2px 0 4px;font-family:var(--display);font-weight:800;font-stretch:75%;font-variation-settings:"wdth" 75;text-transform:uppercase;font-size:26px;line-height:.95;letter-spacing:-.2px}
 .row .facts{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted)}
 .row .facts b{color:var(--aubergine);font-weight:500}
@@ -634,7 +635,7 @@ form.card .btn-dark{background:var(--tomato);color:var(--aubergine)}
       <span class="eyebrow" style="color:var(--lilac)">Stay curious</span>
       <p class="src">Every event belongs to its organiser. Listings are gathered from jersey.com, localevents.je, Channel Eye, Jersey Heritage, Jersey Arts Centre, The Watersplash, Island Ticket Hut, Eventbrite and organisers who send them in. Check the organiser's page before you go.</p>
     </div>
-    <nav aria-label="Footer"><a href="#whats-on">What's on</a><a href="#about">About us</a><a href="#meetup">Go together</a><a href="https://www.instagram.com/socialcircles_ci/" data-form="submit">Add an event</a><a href="#organisers">For brands</a><a href="privacy.html">Privacy</a><a href="https://www.instagram.com/socialcircles_ci/">Instagram</a></nav>
+    <nav aria-label="Footer"><a href="#whats-on">What's on</a><a href="#about">About us</a><a href="this-weekend/">This weekend in Jersey</a><a href="#meetup">Go together</a><a href="https://www.instagram.com/socialcircles_ci/" data-form="submit">Add an event</a><a href="#organisers">For brands</a><a href="privacy.html">Privacy</a><a href="https://www.instagram.com/socialcircles_ci/">Instagram</a></nav>
   </div>
 </footer>
 
@@ -747,7 +748,7 @@ function row(e, at){
   const when = runs(e, at);
   return `
       <article class="row${e.out ? " soldout" : ""}"${e.season ? ` data-season="${e.season}"` : ""}>
-        <div style="min-width:0"><span class="by">By ${esc(e.by)}</span><h4>${esc(e.t)}</h4>
+        <div style="min-width:0"><span class="by">By ${esc(e.by)}</span><h4>${e.page ? `<a class="name" href="${esc(e.page)}">${esc(e.t)}</a>` : esc(e.t)}</h4>
           <div class="facts">${e.time ? `<span><b>${esc(e.time)}</b></span>` : ""}<span>${esc(e.at)}</span>${e.price ? `<span>${esc(e.price)}</span>` : ""}</div>
           <div class="tags"><span class="tag cat">${esc(e.cat)}</span>${when ? `<span class="tag when">${esc(when)}</span>` : ""}${e.type === "exhibition" ? `<span class="tag cat">Exhibition</span>` : ""}${e.free ? `<span class="tag free">Free</span>` : ""}${e.season ? `<span class="tag season">${SEASON[e.season].name}</span>` : ""}${e.out ? `<span class="tag out">Sold out</span>` : ""}</div></div>
         <div class="ctas">${e.out ? "" : `<a class="btn btn-line" href="#meetup" data-go="${esc(e.t)}">Go together</a>`}${e.url ? `<a class="btn ${e.out ? "btn-line" : "btn-dark"}" href="${esc(e.url)}">${e.out ? "Listing" : esc(e.link || "Tickets & info")}</a>` : ""}</div>
