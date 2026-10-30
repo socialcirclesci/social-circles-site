@@ -87,6 +87,7 @@ def head(title, description, path, extra=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=DM+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="/page.css">
+<!-- Cloudflare Web Analytics: counts visits without cookies --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token": "dc545f14bc0d42d4936bfc4efbfcd6ef"}}'></script>
 {extra}</head>
 <body>
 <header class="top"><div class="wrap"><a href="/" aria-label="Social Circles home"><img src="/img/wordmark-aubergine.png" alt="Social Circles" width="140"></a><a class="btn btn-dark" href="/#whats-on">What's on</a></div></header>
