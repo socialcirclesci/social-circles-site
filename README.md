@@ -37,3 +37,7 @@ The site updates a minute or two after you approve. Finished events come off by 
 - `site/` is the whole website, plain HTML with no build step. `events.json` is generated on deploy.
 - `scripts/event_card.py` reads and writes the card format; `scripts/build_events.py` builds `events.json`; `scripts/tally_to_cards.py` imports Tally submissions; `scripts/review_cards.py` pre-checks pending cards.
 - Tests: `python3 -m unittest discover -s tests`.
+
+## Meet the maker
+
+"Meet the maker" shows an organiser's answers to three questions on their event pages. Answers come in through the "Meet the maker" Tally form (set the `TALLY_MAKER_FORM_ID` repository variable to its ID) and become cards labelled `maker` and `pending`. Add `approved` to publish one, the same as an event. The card's Organiser must match the name on their events (a name like "The Stoodio at ArtHouse Jersey" still finds The Stoodio). Form questions: "Organiser name", "What do you make or run?", "What should someone coming for the first time expect?", "Where else in Jersey do you love to go?", "Instagram handle" (optional), plus an optional email so you can reply, which stays in Tally.

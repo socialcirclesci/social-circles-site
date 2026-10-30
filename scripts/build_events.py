@@ -9,6 +9,7 @@ import datetime as dt
 import json
 
 from event_card import GitHub, to_event
+from makers import index, to_maker
 from pages import build, slug
 from seo import inject
 
@@ -33,6 +34,8 @@ def main():
 
     events = []
     for issue in gh.issues(labels="approved"):
+        if any(l["name"] == "maker" for l in issue["labels"]):  # Meet the maker answers, read below
+            continue
         if not trusted(issue):
             print(f"#{issue['number']}: skipped, written by someone outside the project")
             continue
@@ -53,7 +56,7 @@ def main():
 
     if args.tidy:  # pending cards for events that have already happened
         for issue in gh.issues(labels="pending"):
-            if any(l["name"] == "approved" for l in issue["labels"]):
+            if any(l["name"] in ("approved", "maker") for l in issue["labels"]):
                 continue
             e, _ = to_event(issue["title"], issue["body"], today)
             if e and dt.date.fromisoformat(max([e.get("end", e["d"])] + e.get("dates", []))) < today - dt.timedelta(days=1):
@@ -71,7 +74,8 @@ def main():
         with open(args.html, "w") as f:
             f.write(inject(page, events))
     if args.pages:
-        build(args.pages, events, today)
+        makers = [to_maker(i["title"], i["body"]) for i in gh.issues(labels="maker,approved") if trusted(i)]
+        build(args.pages, events, today, index(m for m in makers if m))
     print(f"{len(events)} events published")
 
 

@@ -40,6 +40,7 @@ LABELS = {
     "submitted": ("FF5B2E", "Sent in through the website form"),
     "ready": ("B6E3C5", "Pre-checked: nothing looks wrong"),
     "check": ("FFD3C4", "Pre-checked: something needs a look (see the comment)"),
+    "maker": ("FFE7A8", "Meet the maker answers from an organiser"),
 }
 EMPTY = {"", "_no response_", "none", "n/a", "-", "tbc"}
 

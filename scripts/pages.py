@@ -12,6 +12,7 @@ import shutil
 import unicodedata
 from pathlib import Path
 
+from makers import find
 from seo import SITE, event_ld
 
 DOW, MON = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -114,7 +115,7 @@ def card(e, today):
 """
 
 
-def event_page(e, events, today):
+def event_page(e, events, today, makers=None):
     first = next_on(e, today) or dt.date.fromisoformat(e["d"])
     title = f"{e['t']}, {short(first)} · What's on in Jersey · Social Circles"
     desc = e.get("blurb") or f"{e['t']} by {e['by']} at {e['at']}, {when(e, today)}. Find it and more things to do in Jersey on Social Circles."
@@ -134,12 +135,25 @@ def event_page(e, events, today):
   <div class="actions">{f'<a class="btn btn-dark" href="{esc(e["url"])}">{esc(e.get("link") or "Tickets & info")}</a>' if e.get("url") else ""}{'' if e.get("out") else '<a class="btn btn-line" href="/#meetup">Find people to go with</a>'}</div>
   <p class="note">{esc(e['by'])} runs this event. Social Circles lists it so more people hear about it; tickets and details come from the organiser.</p>
 </article>
-"""
+""" + maker(find(makers or {}, e["by"]))
     more = [x for x in events if x is not e and next_on(x, today)]
     more.sort(key=lambda x: (x["cat"] != e["cat"], next_on(x, today)))
     if more:
         out += f'<section class="more"><h2>More on<br><span class="v">in Jersey</span></h2><ul class="list">{"".join(card(x, today) for x in more[:6])}</ul><p><a class="btn btn-line" href="/this-weekend/">This weekend in Jersey</a> <a class="btn btn-line" href="/#whats-on">See everything</a></p></section>\n'
     return out + FOOT
+
+
+def maker(m):
+    if not m:
+        return ""
+    qa = [("What they make or run", m.get("what")), ("Coming for the first time?", m.get("expect")), ("Where else they love in Jersey", m.get("loves"))]
+    insta = f'<p class="links"><a class="btn btn-line" href="https://www.instagram.com/{esc(m["insta"])}/" rel="noopener">@{esc(m["insta"])} on Instagram</a></p>' if m.get("insta") else ""
+    return f"""<section class="panel maker"><span class="eyebrow">Meet the maker</span><h2>{esc(m['by'])}</h2>
+  <dl>{''.join(f'<dt>{q}</dt><dd>{esc(a)}</dd>' for q, a in qa if a)}</dl>
+  {insta}
+  <p class="note">In their own words.</p>
+</section>
+"""
 
 
 def weekend(today):
@@ -181,14 +195,14 @@ def sitemap(events, today):
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{rows}</urlset>\n'
 
 
-def build(site, events, today=None):
+def build(site, events, today=None, makers=None):
     """Write site/events/<slug>/, site/this-weekend/ and site/sitemap.xml from the published events."""
     today, site = today or dt.date.today(), Path(site)
     shutil.rmtree(site / "events", ignore_errors=True)  # finished events drop off with their pages
     for e in events:
         page = site / "events" / slug(e) / "index.html"
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(event_page(e, events, today))
+        page.write_text(event_page(e, events, today, makers))
     (site / "this-weekend").mkdir(exist_ok=True)
     (site / "this-weekend" / "index.html").write_text(weekend_page(events, today))
     (site / "sitemap.xml").write_text(sitemap(events, today))
