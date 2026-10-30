@@ -108,7 +108,7 @@ def main():
     others = cards + gh.issues(labels="approved")
     for issue in cards:
         names = {l["name"] for l in issue["labels"]}
-        if "approved" in names:
+        if "approved" in names or "maker" in names:  # maker cards aren't events
             continue
         digest = hashlib.sha1(f"{issue['title']}\n{issue['body']}\n{today}".encode()).hexdigest()[:12]
         problems, notes = review(issue, others, today)

@@ -20,3 +20,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
           TALLY_SUBMIT_FORM_ID: ${{ vars.TALLY_SUBMIT_FORM_ID || 'LDZAZz' }}  # the "Add an event" form
+      - run: python3 scripts/tally_makers.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+          TALLY_MAKER_FORM_ID: ${{ vars.TALLY_MAKER_FORM_ID || '' }}  # the "Meet the maker" form, once it exists
