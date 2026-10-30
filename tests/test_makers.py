@@ -5,31 +5,8 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from getting_there import getting_there  # noqa: E402
 from makers import find, format_maker, index, key, to_maker  # noqa: E402
 from pages import build, slug  # noqa: E402
-
-
-class GettingThere(unittest.TestCase):
-    def test_town(self):
-        self.assertIn("St Helier town", getting_there("Jersey Arts Centre")[0])
-        self.assertIn("St Helier town", getting_there("The Wellbeing Hub, 19 Commercial Buildings, St Helier")[0])
-
-    def test_out_of_town(self):
-        said, url = getting_there("Watersplash Beach Bar & Diner, St Ouen's Bay")
-        self.assertIn("Out of town", said)
-        self.assertIn("travelmode=transit", url)
-
-    def test_unknown_place_makes_no_claim(self):
-        said, _ = getting_there("The Drift")
-        self.assertNotIn("town", said)
-
-    def test_no_place(self):
-        self.assertIsNone(getting_there("Location shared when you book"))
-        self.assertIsNone(getting_there("Venue on booking"))
-
-    def test_castle(self):
-        self.assertIn("causeway", getting_there("Elizabeth Castle, St Aubin's Bay")[0])
 
 
 class Makers(unittest.TestCase):
@@ -60,7 +37,7 @@ class Makers(unittest.TestCase):
             page = (Path(site) / "events" / slug(e) / "index.html").read_text()
         self.assertIn("Meet the maker", page)
         self.assertIn("An open arts studio.", page)
-        self.assertIn("Getting", page)
+        self.assertNotIn("Getting there", page)
 
 
 if __name__ == "__main__":

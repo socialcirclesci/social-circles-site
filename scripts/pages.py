@@ -12,7 +12,6 @@ import shutil
 import unicodedata
 from pathlib import Path
 
-from getting_there import TIMETABLES, getting_there
 from makers import find
 from seo import SITE, event_ld
 
@@ -136,24 +135,12 @@ def event_page(e, events, today, makers=None):
   <div class="actions">{f'<a class="btn btn-dark" href="{esc(e["url"])}">{esc(e.get("link") or "Tickets & info")}</a>' if e.get("url") else ""}{'' if e.get("out") else '<a class="btn btn-line" href="/#meetup">Find people to go with</a>'}</div>
   <p class="note">{esc(e['by'])} runs this event. Social Circles lists it so more people hear about it; tickets and details come from the organiser.</p>
 </article>
-""" + bus(e) + maker(find(makers or {}, e["by"]))
+""" + maker(find(makers or {}, e["by"]))
     more = [x for x in events if x is not e and next_on(x, today)]
     more.sort(key=lambda x: (x["cat"] != e["cat"], next_on(x, today)))
     if more:
         out += f'<section class="more"><h2>More on<br><span class="v">in Jersey</span></h2><ul class="list">{"".join(card(x, today) for x in more[:6])}</ul><p><a class="btn btn-line" href="/this-weekend/">This weekend in Jersey</a> <a class="btn btn-line" href="/#whats-on">See everything</a></p></section>\n'
     return out + FOOT
-
-
-def bus(e):
-    there = getting_there(e.get("at"))
-    if not there:
-        return ""
-    said, directions = there
-    return f"""<section class="panel there"><h2>Getting<br><span class="v">there</span></h2>
-  <p>{esc(said)}</p>
-  <p class="links"><a class="btn btn-line" href="{esc(directions)}" rel="noopener">Bus directions</a> <a class="btn btn-line" href="{TIMETABLES}" rel="noopener">LibertyBus timetables</a></p>
-</section>
-"""
 
 
 def maker(m):
